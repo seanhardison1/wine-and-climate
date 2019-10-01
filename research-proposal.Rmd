@@ -1,0 +1,23 @@
+---
+title: "Modeling the role of climate drivers on California wine vintage ratings"
+output: 
+  bookdown::pdf_document2:
+    toc: false
+    number_sections: false
+bibliography: wine-and-climate.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Larger Context
+
+Introduced to the state by Franciscan missionaries in the late 18th century, Californian wine grapes (*Vitis vinifera*) now account for over 90% of the wine produced in the United States [@cahill2007; @alston2018]. This level of production makes California the fourth largest producer of wine in the world [@cahill2007], with 2016 production valued at $3.6 billion [@alston2018]. California wine production is divided spatially into 17 "crush" districts representing the administrative areas in which grapes were grown [@usda2019]. @alston2018 present five general groupings aggregating the crush districts; each representative of unique regional terrain, growing conditions, and climate. Climate change has and will continue to unfold in unique ways across these distinct regions, resulting in differential changes to an economically vital American crop. 
+
+## Specific problem
+
+These five regions (Table 1) characterize a narrow band of climates that are conducive to wine grape agriculture, and are threatened by long-term climate changes in subtle ways [@jones2007]. For example, @white2006 used high-resolution climate models (25 km) to show that projected increases in extreme temperatures would virtually eliminate wine production in regions only marginally well-suited for grape agriculture in the United States, while also creating small-scale refugia for high-quality wine production. Further, average growing season temperatures, which have increased in California since the early 20th century [@white2006], are major predictors of grape maturities that vary by varietal [@jones2007]. The shifting climate of regions that are currently suitable for high-quality wine production of a given varietal may favor different grapes in the future [@jones2007]. 
+
+
+
