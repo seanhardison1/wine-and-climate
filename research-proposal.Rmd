@@ -1,9 +1,17 @@
 ---
-title: "Modeling the role of climate drivers on California wine vintage ratings"
-output: 
+title: "Examining climate pressure-response thresholds in California viticulture"
+author: Sean Hardison
+output:
+  pdf_document:
+    toc: no
+    includes:
+      in_header: header.tex
   bookdown::pdf_document2:
-    toc: false
-    number_sections: false
+    keep_tex: yes
+    number_sections: no
+    toc: no
+  word_document: null
+fontsize: 11pt
 bibliography: wine-and-climate.bib
 ---
 
@@ -13,33 +21,35 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Larger Context
 
-Introduced to the state by Franciscan missionaries in the late 18th century, Californian wine grapes (*Vitis vinifera*) now account for over 90% of the wine produced in the United States [@cahill2007; @alston2018]. This level of production makes California the fourth largest producer of wine in the world [@cahill2007], with 2016 production valued at $3.6 billion [@alston2018]. California wine production is divided spatially into 17 "crush" districts representing the administrative areas in which grapes were grown [@usda2019]. @alston2018 present five general groupings aggregating the crush districts; each representative of different regional terrains, growing conditions, and weather patterns. Given their unique geographic arrangement and local environments, these regions have and will continue to experience climate change in site specific ways playing out differentially across grape varietals.  
+Introduced to the state by Franciscan missionaries in the late 18th century, Californian wine grapes (*Vitis vinifera*) now account for over 90% of the wine produced in the United States [@cahill2007; @alston2018]. This level of production makes California the fourth largest producer of wine in the world [@cahill2007], with 2016 production valued at $3.6 billion [@alston2018]. California wine 
+production can be divided spatially into five general groupings aggregating administrative areas of grape agriculture [@alston2018]. Each of the five regions is representative of different soil properties, weather patterns, and production goals. Given their unique geographic arrangement and local environments, these regions have and will continue to experience climate change in site specific ways playing out differentially across grape varietals.  
 
 ## Specific problem
 
-The effects of climate change on many aspects California viticulture are well known. For example, @white2006 used high-resolution climate models (25 km) to show that projected increases in extreme temperatures would virtually eliminate wine production in regions only marginally well-suited for viticulture in the United States, while also creating small-scale refugia for high-quality wine production. Further, average growing season temperatures, which have increased along the Central Coast of California by 1.6 \textdegree C since 1930 [@jones2008], are major predictors of grape maturities that vary by varietal [@jones2007]. The Pacific Decadal Oscillation (PDO) has also been shown to affect wine quality in California, with warm phases of the PDO bringing fewer frosts and longer growing seasons to the state [@jones2008]. While the potential outcomes of climate change on wine quality and viticulture potential have been explored, regionally and varietally specific climate pressure-response thresholds have yet to be quantified. For these thresholds, small changes in climate pressure may result in large and non-linear changes to wine quality.
-
-<!-- Further, climates conducive to viticulture within the past 30-40 years have been hypothesized to contribute to concurrent increases in wine quality, but the relative influences techonological innovation on wine quality during this time period, while assumed, have yet to be explored [@jones2008]. -->
-
-<!-- The shifting climate of regions that are currently suitable for high-quality wine production of a given varietal may favor different grapes in the future [@jones2007].  -->
+The effects of climate change on many aspects California viticulture are well known. For example, @white2006 used high-resolution climate models (25 km) to show that projected increases in extreme temperatures would drastically reduce the production potential of viticulture in the United States. Further, average growing season temperatures, which have increased along the Central Coast of California by 1.6 \textdegree C since 1930 [@jones2008], are major predictors of grape maturities that vary by varietal [@jones2007]. The Pacific Decadal Oscillation (PDO) has also been shown to affect wine quality in California, with warm phases of the PDO bringing fewer frosts and longer growing seasons to the state [@jones2008]. Many potential outcomes of climate change on viticulture potential have been explored, but the identification of key climate pressure-response thresholds could prove beneficial to sustainable future viticulture as the climate warms. For these thresholds, small changes in climate pressure may result in large and non-linear changes to wine quality and viticulture productivity.
 
 ## Hypothesis
 
-We first hypothesize that climate pressures affect California wine quality in varietally and regionally specific ways, and that these differences result in quality thresholds with potential actionable outcomes for viticulturists. The goal of this work is to inform viticulturists of climate pressure thresholds that create outsized effects on wine quality, and how these relationships change with region and varietal. 
+We first hypothesize that climate pressures affect California wine quality in varietally and regionally specific ways, and that these differences result in quality thresholds with potentially actionable outcomes for viticulturists. The goal of this work is to inform viticulturists of climate pressure thresholds that create outsized effects on wine quality, and how these relationships change with region and varietal. 
 
 ## Data
 
-Regional long-term weather stations will be the main sources for developing relevant indices of temperature within viticultural areas (Fig. A1). These data will be collected from 67 Automated Surface Observing System (ASOS) sensors located at various California airports; queried using the `riem` R package [@salmon2016]. Data collected by ASOS sensors is typically on the hourly timescale, with the relevant measured variable being air temperature at 2 m. Using the parameters outlined in @jones2008 as a starting point, we can derive monthly maximum, minimum, and average air temperature during the growing season (April - October), as well as average temperatures during the ripening period (August 15 - October 15). We will also be able to determine the dates of first fall frost, last spring frost, and duration of the frost-free period. Spatial coverage of weather stations is limited in some counties (see Fig A1), so pressure time series will be averaged to the spatial level of wine region.
+Regional long-term weather stations will be the main sources for developing relevant indices of temperature within viticultural areas. These data will be collected from 67 Automated Surface Observing System (ASOS) sensors located at various California airports; queried using the `riem` R package [@salmon2016]. Data collected by ASOS sensors is typically on the hourly timescale, with the relevant measured variable being air temperature at 2 m. Using the parameters outlined in @jones2008 as a starting point, we can derive monthly maximum, minimum, and average air temperature during the growing season (April - October), as well as average temperatures during the ripening period (August 15 - October 15). We will also be able to determine the dates of first fall frost, last spring frost, and duration of the frost-free period. 
 
-Our second climate pressure variable is the Pacific Decadal Oscillation (PDO). Postive phases of the PDO typically bring warmer winters with fewer frost days and are generally thought to be beneficial to wine grape production [@jones2008]. Conceptually, the PDO is a decadal scale indicator of sea surface temperature anomalies in the North Pacific Basin. For this study, a time series of the PDO index will be averaged annually to serve as a climate pressure variable. Source data for the monthly PDO index is available from Nathan Mantua (UW/JISAO) and hosted freely online at http://research.jisao.washington.edu/pdo/PDO.latest.
-<!-- Second, we will develop a simple "efficiency" indicator to broadly characterize technological innovation in viticulture. We hypothesize that the relative influences of both technological innovation and climate on wine quality can be estimated through statistical models.  -->
+Our second climate pressure variable is the Pacific Decadal Oscillation (PDO). Postive phases of the PDO typically bring warmer winters with fewer frost days and are generally thought to be beneficial to wine grape production [@jones2008]. Conceptually, the PDO is a decadal scale indicator of sea surface temperature anomalies in the North Pacific Basin [@ncei2019]. For this study, a time series of the PDO index will be averaged annually to serve as a climate pressure variable. Source data for the monthly PDO index is available from Nathan Mantua (UW/JISAO) and hosted freely online at http://research.jisao.washington.edu/pdo/PDO.latest.
 
+The response data in this study are historical wine ratings data (scale of 0-100) queried from the WineEnthusiast website using an R script developed primarily with the package `rvest` [@wickham2019]. The ratings query was limited in scope to the state of California, and data were processed to include vintage, region, name, and year for a particular rated bottle. In California alone there have been nearly 1.6 million reviewed bottles extending back to 1978.
 
+## Analysis 
 
+Threshold analysis is commonly applied in the ecosystem-based fisheries management literature [e.g. see @samhouri2009; @large2013; @large2015] to estimate the role of ecosystem pressures, such as commercial fishing and ocean temperature changes, on indices of biodiveristy or ecosystem resilience. The methods we will apply are similar to those presented in @large2013 with some simplifications to ensure analyses may be completed within the project deadline. Specifically, we will use Generalized Additive Models (GAMs) to estimate the presence and magnitude of non-linear relationships between pressure and response variables. By quantifying the first derivatives of smooth terms, $s_i(x)$, we can identify "tipping points" that suggest a threshold being met. A bootstrapping technique may be applied to smoother terms to identify regions where the first derivative of the smooth is significantly different from 0 [@large2013].
 
+## Work Plan
 
+We propose the following work plan to ensure that the project is finished within the deadline:
 
-
-
-<!-- These five regions (summarized in Table 1) characterize a narrow band of climates that are conducive to wine grape agriculture, and are threatened by long-term climate changes in subtle ways [@jones2007].  -->
-<!-- * Idea: GAMs with random effects for month variable -->
+* Finish data aggregation for modeling - October 11
+* Exploratory data analyses and deadline to rethink project goals if necessary - October 26
+* Finish modeling and begin to write - November 8 
+* Submit draft report - November 29
+* Submit final report - December 6

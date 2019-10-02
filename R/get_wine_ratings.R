@@ -4,9 +4,10 @@ library(svMisc)
 
 
 wine_ratings <- NULL
-for (i in 1:500){
+for (i in 1:79657){
+  message(i)
   progress(i, progress.bar = TRUE)
-  url <- paste0("https://www.winemag.com/wine-ratings/?s=&drink_type=wine&page=",i,"&sort_by=pub_date_web&sort_dir=desc")
+  url <- paste0("https://www.winemag.com/wine-ratings/",i,"/?s=&country=US&state=California&page=1")
   wine_html <- read_html(url)
   
   titles <- 
@@ -16,8 +17,16 @@ for (i in 1:500){
     html_text() %>% 
     unique()
   
-  years <- 
-    str_extract(titles, "\\d{4}")
+  years <- NULL
+  for (j in 1:length(titles)){
+    if (str_detect(titles[j], "\\d{4}")){
+      years[j] <- 
+        str_extract(titles[j], "\\d{4}")
+    } else {
+      years[j] <- NA
+    }
+  }
+  
   
   ratings <- 
     wine_html %>% 
@@ -25,15 +34,39 @@ for (i in 1:500){
     html_nodes(".rating ") %>% 
     html_text() 
   
-  wine_df <- data.frame(
-    titles = titles,
-    years = years,
-    ratings = ratings
-  )
-  
-  assign("wine_ratings", rbind(wine_ratings,wine_df))
+  location <- 
+    wine_html %>% 
+    html_node('body') %>% 
+    html_nodes(".appellation") %>% 
+    html_text()
 
-  date_time<-Sys.time()
+  if (length(location) != length(titles)) location <- location[c(T,F)]
   
-  while((as.numeric(Sys.time()) - as.numeric(date_time))<1.5){}
+  if (length(ratings) == length(location) & length(location) == length(titles) & length(titles) == length(years)){
+    
+    wine_df <- data.frame(
+      titles = titles,
+      years = years,
+      ratings = ratings,
+      location = location
+    )
+    
+    assign("wine_ratings", rbind(wine_ratings,wine_df))
+    
+  } else {
+    print(paste(length(ratings),
+                length(location) ,
+                length(titles),
+                length(years), "skipping to next page"))
+    next
+  }
+  
+  #Do some waiting around so you don't accidentally crash their servers
+  # if (i %% 100 == 0 & i != 1){
+    date_time<-Sys.time()
+    while((as.numeric(Sys.time()) - as.numeric(date_time))<2){}
+  #   message("Waiting...")
+  # 
+  # }
+  
 }
