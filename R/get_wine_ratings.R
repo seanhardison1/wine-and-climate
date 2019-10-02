@@ -7,7 +7,7 @@ wine_ratings <- NULL
 for (i in 1:79657){
   message(i)
   progress(i, progress.bar = TRUE)
-  url <- paste0("https://www.winemag.com/wine-ratings/",i,"/?s=&country=US&state=California&page=1")
+  url <- paste0("https://www.winemag.com/wine-ratings/",i,"/?s=&country=US&state=California&page=",i)
   wine_html <- read_html(url)
   
   titles <- 
