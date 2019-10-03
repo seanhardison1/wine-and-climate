@@ -3,10 +3,6 @@ title: "Examining climate pressure-response thresholds in California viticulture
 author: Sean Hardison
 output:
   pdf_document:
-    toc: no
-    includes:
-      in_header: header.tex
-  bookdown::pdf_document2:
     keep_tex: yes
     number_sections: no
     toc: no
@@ -15,6 +11,7 @@ fontsize: 11pt
 bibliography: wine-and-climate.bib
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -22,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Larger Context
 
 Introduced to the state by Franciscan missionaries in the late 18th century, Californian wine grapes (*Vitis vinifera*) now account for over 90% of the wine produced in the United States [@cahill2007; @alston2018]. This level of production makes California the fourth largest producer of wine in the world [@cahill2007], with 2016 production valued at $3.6 billion [@alston2018]. California wine 
-production can be divided spatially into five general groupings aggregating administrative areas of grape agriculture [@alston2018]. Each of the five regions is representative of different soil properties, weather patterns, and production goals. Given their unique geographic arrangement and local environments, these regions have and will continue to experience climate change in site specific ways playing out differentially across grape varietals.  
+production can be divided spatially into four general groupings aggregating administrative areas of grape agriculture [@alston2018]. Each of the four regions is representative of different soil properties, weather patterns, and production goals. Given their unique geographic arrangement and local environments, these regions have and will continue to experience climate change in site specific ways playing out differentially across grape varietals.  
 
 ## Specific problem
 
@@ -53,3 +50,5 @@ We propose the following work plan to ensure that the project is finished within
 * Finish modeling and begin to write - November 8 
 * Submit draft report - November 29
 * Submit final report - December 6
+
+\newpage
