@@ -15,8 +15,13 @@ for (i in 1:79657){
     html_node('body') %>% 
     html_nodes(".title") %>% 
     html_text() %>% 
-    unique()
-  
+    as.data.frame() %>% 
+    mutate(index = rep(c(1,2),length(.)/2)) %>% 
+    filter(index == 1) %>% 
+    dplyr::rename(titles = 1) %>% 
+    pull(titles) %>% 
+    as.character()
+
   years <- NULL
   for (j in 1:length(titles)){
     if (str_detect(titles[j], "\\d{4}")){

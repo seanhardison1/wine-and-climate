@@ -54,10 +54,74 @@ Jones, Gregory V. 2007. ``Climate Change: Observations, Projections, and
 General Implications for Viticulture and Wine Production.''
 \emph{Economics Department-Working Paper} 7: 14.
 
+\begin{itemize}
+\tightlist
+  \item
+    Viticulture typically exists (or is optimal) within narrow climatological bounds. Given these narrow bounds, short-term variation can have large effects on wine quality. Long-term changes can influence habitat suitability for specific wine grapes.
+  \item
+    A variety of metrics have been used to measure the impact of climate on wine: GDD, mean temperatures of the warmest month and growing season.
+  \item
+    Temperature thresholds exist where certain grape varietals lose suitability for planting in a region. Jones 2008 describes these in terms of average growing season temperatures. These temperatures are shifting through time.
+  \item
+    Flavor balance will be a good indicator for when a wine is passed a climate threshold
+  \item
+    Trends in increasing alcohol levels are related to climate variability and change
+  \item
+    Generally there have been trends of increasing wine quality and less vintage-to-vintage variation in quality. The relationships between climate and these variables is not always linear or uniform. 
+  \item
+    Early projections of wine quality increases due to warming climate in Bordeaux and Champagne have been shown to be accurate.
+  \item
+    Under projected warming for the next century, suitable habitat for viticulture is predicted to move upwards (i.e. elevation) and towards the coast in California. Habitat is projected to expand in Washington and Oregon by ~25%. 
+  
+\end{itemize}
+
 \hypertarget{ref-jones2008}{}
 Jones, Gregory V, and Gregory B Goodrich. 2008. ``Influence of Climate
 Variability on Wine Regions in the Western Usa and on Wine Quality in
 the Napa Valley.'' \emph{Climate Research} 35 (3): 241--54.
+
+\begin{itemize}
+\tightlist
+  \item
+    Wine growers typically associate El Niño with poor grape quality, but no research has actually been done to estimate the relationship in California. 
+  \item
+    The Pacific Decadal Oscillation has been shown to affect wine quality in California, but only in wines of Napa and Sonoma Counties
+  \item
+    Goal of this work was to understand the role of the PDO in climatic variables used in viticulture. Specifically the multi-decadal PDO and interannual ENSO
+  \item
+    Used United States Historical Climate Network data; 22 stations for California. Gave 10 regions to modeling climate variables through time between 1930-2002.
+  \item
+    A series of climate parameters were derived from the USHCN: 5 related to temperature/heat accumulation, 6 to frost incidence, and 4 to precipitation
+  \item
+    Years of El Niño and La Niña were identified by taking the 5 year moving average of SST within the "Niño-3.4" region, defined by a bounding box over the equatorial central Pacific. If the SST anomaly exceeded 0.4 \textdegree C for > 6 mo, then there was an El Niño. In the period selected, there were 19 El Niño years and 17 La Niña years. 30 of the years were neutral.
+  \item
+    The PDO index is the "leading principal component or eigenvector of the mean monthly SSTs in the Pacific Ocean north of 20 \textdegree N latitude." The PDO occurs on about a 50 year period, and results in warmer SSTs on on the west coast when in a positive phase.
+  \item
+    Less is known about the PDO than ENSO. The PDO is debatably ENSO "red noise" or the "superposition of SST fluctuations emanating from dynamical modes such as ENSO and the Kuroshio-Oyashio Extension".
+  \item
+    The PDO may be the cause of the step change in GDD between 1976-1977 in California
+  \item
+    Jones 2005 showed that a 1 \textdegree C increase in temperature increased wine ratings by 13 points
+  \item
+    Paper focuses specifically on Cabernet Sauvignons from Napa.
+  \item
+    Looking at the rolling average of the Wine Spectator ratings, my guess is that these ratings don't follow a normal distribution. I should investigate distributions that better fit the data.
+  \item
+    Wine ratings are highly correlated between sources (R^2 = 0.9). It's probably okay to rely on Wine Enthusiast ratings, unless more data are easily available.
+  \item
+    Average growing season temps increased by 0.9 \textdegree C between 1933 - 2002. Further, the number of days below 0 dropped by 29 days annually over the time period. 
+  \item
+    There were large changes in start of spring and fall. The last day of spring came 44 days earlier and first fall 41 days later.
+  \item
+    ENSO phase was not a significant factor for wine production model. 
+  \item
+    PDO was highly significant predictor for temperature variables affecting wine production, mainly due to more cold days during cold phases of the PDO. 
+  \item
+    No significant changes in precipitation through the time period
+  \item
+    No autocorrelation in derived climatic time series (Durbin-Watson)
+    
+\end{itemize}
 
 \hypertarget{ref-large2013}{}
 Large, Scott I, Gavin Fay, Kevin D Friedland, and Jason S Link. 2013.
@@ -65,24 +129,64 @@ Large, Scott I, Gavin Fay, Kevin D Friedland, and Jason S Link. 2013.
 to Fishing and Environmental Pressures.'' \emph{ICES Journal of Marine
 Science} 70 (4). Oxford University Press: 755--67.
 
+\begin{itemize}
+\tightlist
+  \item
+    Single-species methods for fisheries management do not typically consider environmental or ecosystem information in assessments. Ecosystem-based fisheries management is the field in which ecosystem information is considered within the process of management, either in qualitative or quantitative fashion. 
+  \item
+    Before management action can be taken, the levels at which ecosystem pressures affect some index of interest must be established. 
+  \item
+    Many studies provide address the general levels at which ecosystem processes change, but do not address "tipping points" explicitly
+  \item
+    Cumulative sums, sequential t-tests, empirical fluctuation processes have been used to identify changes in mean or variance of time series
+  \item
+    Thresholds exist when a small change in a pressure variable leads to large changes in the response. Quantifiable with Generalized Additive Models (GAMs).
+  \item
+    GAMs follow the notation, Y = \alpha + s(X) + \epsilon. The smoothing term, s(X), is a cubic spline fit to segments of the response variable series, Y. The smoothed terms are connected at "knots" that are optimized to themselves be smooth. \alpha is the intercept and \epsilon is the error term, assumed to have been drawn from a normal distribution with mean 0 and variance \sigma^2.
+
 \hypertarget{ref-large2015}{}
 ---------. 2015. ``Quantifying Patterns of Change in Marine Ecosystem
 Response to Multiple Pressures.'' \emph{PLoS One} 10 (3). Public Library
 of Science: e0119922.
+
+\begin{itemize}
+\tightlist
+  \item
+    I included this paper as another reference for ecosystem threshold analyses. This paper uses gradient forest methods to quantify multivariate pressure-response relationships. I did not include any information from this work in my proposal.  
+\end{itemize}
+
 
 \hypertarget{ref-ncei2019}{}
 NCEI, NOAA. 2019. ``Pacific Decadal Oscillation (Pdo).'' National
 Oceanic; Atmospheric Administration.
 \url{https://www.ncdc.noaa.gov/teleconnections/pdo/}.
 
+\begin{itemize}
+\tightlist
+  \item
+    This NOAA site provided insight into what the PDO is and how it is measured. It also links out to the PDO index time series.
+\end{itemize}
+
 \hypertarget{ref-salmon2016}{}
 Salmon, Maëlle. 2016. \emph{Riem: Accesses Weather Data from the Iowa
 Environment Mesonet}. \url{https://CRAN.R-project.org/package=riem}.
+
+\begin{itemize}
+\tightlist
+  \item
+    The riem R package provides access to ASOS sensor data via the Iowa Environment Mesonet.
+\end{itemize}
 
 \hypertarget{ref-samhouri2009}{}
 Samhouri, Jameal F, Phillip S Levin, and Chris J Harvey. 2009.
 ``Quantitative Evaluation of Marine Ecosystem Indicator Performance
 Using Food Web Models.'' \emph{Ecosystems} 12 (8). Springer: 1283--98.
+
+\begin{itemize}
+\tightlist
+  \item
+    This work explores different types of ecosystem thresholds and how they may be understood from a management perspective.
+\end{itemize}
 
 \hypertarget{ref-white2006}{}
 White, Michael A, NS Diffenbaugh, Gregory V Jones, JS Pal, and F Giorgi.
@@ -90,9 +194,36 @@ White, Michael A, NS Diffenbaugh, Gregory V Jones, JS Pal, and F Giorgi.
 Production in the 21st Century.'' \emph{Proceedings of the National
 Academy of Sciences} 103 (30). National Acad Sciences: 11217--22.
 
+\begin{itemize}
+\tightlist
+  \item
+    Agricultural systems are vulnerable to the warming of the 21st century, and grapes are an optimal case for studying the effects of warming
+  \item
+    Grape production in the United States is valued at $2.9 billion (2006). 
+  \item 
+    Authors explored the effects of greenhouse gas-forced climated change models on a fine scale (25 km).
+  \item
+    Important to highlight the spatial heterogeneity at which climate change plays out
+  \item
+    Results project a shrinking and shifting of premium viticultural area in the United States.   \item
+    Southwest and midwest United States projected to see the viticulture eliminated, save for high elevations.
+  \item
+    Considering mean climate alone without considering variability could hugely alter climate change impacts. If extreme temperatures are ignored during simulation runs, premium viticultural area is only marginally effected. When considering variability, the "marginal", or mid-quality areas are virtually eliminated from projections. 
+  \item
+    Changes in extreme heat were a much larger factor than changes to season phenology
+  \item
+    Projections suggest a shift towards higher humidity regions, which tend to coincide with other issues for viticultue, such as fungal infections. Breeding programs and technological innovations may be helpful for addressing these changes. 
+    
+\end{itemize}
+
 \hypertarget{ref-wickham2019}{}
 Wickham, Hadley. 2019. \emph{Rvest: Easily Harvest (Scrape) Web Pages}.
 \url{https://CRAN.R-project.org/package=rvest}.
 
+\begin{itemize}
+\tightlist
+  \item
+    The rvest R package provides a simple set of functions for navigating web scraping using R. I used this package to scrape Wine Enthusiast ratings data.
+\end{itemize}
 
 \end{document}
