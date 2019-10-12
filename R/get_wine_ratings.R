@@ -7,8 +7,8 @@ scrape_ratings <- function(init){
   out <- tryCatch({
     
     message(init)
-    Sys.sleep(2)
-    url <- paste0("https://www.winemag.com/wine-ratings/",init,"/?s=&country=US&state=California&page=",init)
+    # Sys.sleep(2)
+    url <- paste0("https://www.winemag.com/?s=California&drink_type=wine&page",init,"&search_type=reviews")
     wine_html <- read_html(url)
     
     titles <- 
@@ -23,6 +23,28 @@ scrape_ratings <- function(init){
       pull(titles) %>% 
       as.character()
     
+  buying_guide <- 
+    str_to_lower(titles) %>% 
+    str_remove("\\(") %>% 
+    str_remove("\\)") %>% 
+    str_remove("'") %>% 
+    str_replace_all("\\s+", "-") %>% 
+    paste0("https://www.winemag.com/buying-guide/",.)
+    
+  variety <- NULL
+  for (j in 1:length(buying_guide)){
+    bg_url <- buying_guide[j]
+    info_html <- read_html(bg_url)
+    
+   bg_variety =  info_html %>% 
+      html_node('body') %>% 
+      html_nodes('.info-section , span') %>% 
+      html_text()
+   
+   variety[j] <- bg_variety[which(bg_variety == "Variety") + 1]
+   
+  }
+  
     years <- NULL
     for (j in 1:length(titles)){
       if (str_detect(titles[j], "\\d{4}")){
@@ -56,7 +78,8 @@ scrape_ratings <- function(init){
           titles = titles,
           years = years,
           ratings = ratings,
-          location = location
+          location = location,
+          variety = variety
         )
       )
       
@@ -78,17 +101,37 @@ scrape_ratings <- function(init){
 }
 
 #get total number of pages
-wine_html <- read_html("https://www.winemag.com/wine-ratings/1/?s=&country=US&state=California&page=1")
+wine_html <- read_html("https://www.winemag.com/?s=California&drink_type=wine&page1&search_type=reviews")
 
 pages <- 
   wine_html %>% 
     html_node('body') %>% 
-    html_nodes(".results-count") %>% 
+    html_nodes(".pagination") %>% 
     html_text() %>% 
-    stringr::str_extract("\\d{3},\\d{3}") %>% 
+    stringr::str_extract("\\d{4}") %>% 
     stringr::str_remove(",") %>% 
     as.numeric()
 
-ratings <- lapply(1:pages, scrape_ratings)
+ratings1 <- NULL
+ratings2 <- NULL
+ratings3 <- NULL
+ratings4 <- NULL
+ratings5 <- NULL
+ratings6 <- NULL
+ratings7 <- NULL
+ratings8 <- NULL
+ratings9 <- NULL
+ratings10 <- NULL
 
+vec <- seq(1, pages, pages/10)
+vec[11] <- pages
+vec <- floor(vec)
 
+for (i in 1){
+  
+  df <- lapply(vec[i]:vec[i + 1], scrape_ratings)
+  df <- do.call(rbind.data.frame, df)
+  assign(paste0("ratings",i),rbind(get(paste0("ratings",i)), df))
+  Sys.sleep(10)
+
+}
