@@ -1,6 +1,7 @@
 library(tidyverse)
 library(rvest)
 library(svMisc)
+library(stringi)
 
 scrape_ratings <- function(init){
   
@@ -8,7 +9,7 @@ scrape_ratings <- function(init){
     
     message(init)
     # Sys.sleep(2)
-    url <- paste0("https://www.winemag.com/?s=California&drink_type=wine&page",init,"&search_type=reviews")
+    url <- paste0("https://www.winemag.com/?s=California&drink_type=wine&page=",init,"&search_type=reviews")
     wine_html <- read_html(url)
     
     titles <- 
@@ -23,17 +24,15 @@ scrape_ratings <- function(init){
       pull(titles) %>% 
       as.character()
     
-  buying_guide <- 
+  buying_guide <-
     str_to_lower(titles) %>% 
-    str_remove("\\(") %>% 
-    str_remove("\\)") %>% 
-    str_remove("'") %>% 
-    str_replace_all("\\s+", "-") %>% 
+    str_remove_all("[^A-Za-z0-9|\\s+|-|è|é|ń|ñ|ê]") %>% 
+    str_replace_all("\\s+", "-") %>%
     paste0("https://www.winemag.com/buying-guide/",.)
     
   variety <- NULL
   for (j in 1:length(buying_guide)){
-    bg_url <- buying_guide[j]
+    bg_url <- stringi::stri_trans_general(buying_guide[j],"Latin-ASCII")
     info_html <- read_html(bg_url)
     
    bg_variety =  info_html %>% 
@@ -41,8 +40,13 @@ scrape_ratings <- function(init){
       html_nodes('.info-section , span') %>% 
       html_text()
    
-   variety[j] <- bg_variety[which(bg_variety == "Variety") + 1]
+   inter <- bg_variety[which(bg_variety == "Variety") + 1]
    
+     if (!identical(inter, character(0))){
+       variety[j] <- inter
+      } else {
+       variety[j] <- bg_url
+     }
   }
   
     years <- NULL
@@ -127,7 +131,7 @@ vec <- seq(1, pages, pages/10)
 vec[11] <- pages
 vec <- floor(vec)
 
-for (i in 1){
+for (i in 4:10){
   
   df <- lapply(vec[i]:vec[i + 1], scrape_ratings)
   df <- do.call(rbind.data.frame, df)
@@ -135,3 +139,9 @@ for (i in 1){
   Sys.sleep(10)
 
 }
+
+cal_wines_1_3 <- bind_rows(ratings1, ratings2, ratings3) %>% 
+  mutate(titles = as.character(titles),
+         years = as.numeric(years),
+         ratings = as.numeric(str_extract(ratings, "\\d{2}")))
+
