@@ -131,7 +131,7 @@ vec <- seq(1, pages, pages/10)
 vec[11] <- pages
 vec <- floor(vec)
 
-for (i in 4:10){
+for (i in 6:10){
   
   df <- lapply(vec[i]:vec[i + 1], scrape_ratings)
   df <- do.call(rbind.data.frame, df)
@@ -140,8 +140,10 @@ for (i in 4:10){
 
 }
 
-cal_wines_1_3 <- bind_rows(ratings1, ratings2, ratings3) %>% 
+cal_wines <- bind_rows(ratings1, ratings2, ratings3, ratings4,ratings5, ratings6, ratings7) %>%
   mutate(titles = as.character(titles),
          years = as.numeric(years),
-         ratings = as.numeric(str_extract(ratings, "\\d{2}")))
+         ratings = as.numeric(str_extract(ratings, "\\d{2}"))) %>% 
+  filter(!is.na(title))
 
+save(cal_wines, file = here::here('data/cal_wines_beta.rdata'))
