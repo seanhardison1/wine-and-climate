@@ -1,7 +1,9 @@
 library(sf)
 library(riem)
 library(tidyverse)
+library(lubridate)
 
+#Counties in CA wine growing region
 central_coast <- c("Ventura","Santa Barbara", "San Luis Obispo", "Monterey",
                    "San Benito", "Santa Clara", "Santa Cruz", "San Mateo",
                    "Alameda","Contra Costa", "San Francisco")
@@ -10,22 +12,24 @@ north_coast <- c("Marin", "Napa", "Sonoma", "Lake", "Mendocino")
 
 n_sj_valley <- c("Yolo", "Solano", "Sacramento", "San Joaquin", 
                  "Stanislaus","Merced")
+
 s_sj_valley <- c("Alpine","Mono","Inyo","Tulare","Kern","Kings","Fresno","Madera")
 
+#Label counties inside the wine growing region of CA
 counties <- st_read(here::here("data/CA_Counties/CA_Counties_TIGER2016.shp")) %>% 
   st_transform(crs = "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs") %>% 
-  mutate(`Wine areas` = if_else(NAME %in% central_coast, "Central coast", 
-                                if_else(NAME %in% north_coast, "North coast",
-                                if_else(NAME %in% n_sj_valley, "N. San Joaquin Valley",
-                        if_else(NAME %in% s_sj_valley, "S. San Joaquin Valley", "NA")))))
+  mutate(`Wine areas` = ifelse(NAME %in% central_coast, "Central coast", 
+                                ifelse(NAME %in% north_coast, "North coast",
+                                ifelse(NAME %in% n_sj_valley, "N. San Joaquin Valley",
+                        ifelse(NAME %in% s_sj_valley, "S. San Joaquin Valley", NA)))))
   
-
-
+#intersect ASOS stations with wine counties
 ca_stations <- riem::riem_stations("CA_ASOS") %>% 
   st_as_sf(.,coords = c("lon","lat"),crs = raster::crs(counties)) %>% 
   st_transform(crs = raster::crs(counties)) %>% 
-  st_intersection(.,counties %>% filter(`Wine areas` != "NA"))
+  st_intersection(.,counties %>% filter(!is.na(`Wine areas`)))
 
+#generate map of wine counties and ASOS stations
 ggplot() +
   geom_sf(data = counties, alpha = 0.01) +
   geom_sf(data = counties %>% filter(`Wine areas` != "NA"),
@@ -35,6 +39,21 @@ ggplot() +
   ecodata::theme_map() +
   ggtitle("California Wine Regions and Weather Stations")
 
-#Get stations 
-ca_stations
+#Get station location data
+save(ca_stations, file = here::here('data/wine_country_riem_stations.rdata'))
+
+#download time series from each station. Write to csv
+out <- NULL
+for (i in 1:length(unique(ca_stations$id))){
+  df <- riem::riem_measures(station = ca_stations$id[i],
+                      date_start = "1980-01-01")
+  df_int <- 
+    df %>% group_by(station, lon, lat, year(valid)) %>% 
+    dplyr::summarise_at(vars(tmpf:mslp), mean, na.rm = TRUE)
+  print(paste0(ca_stations$id[i], "downloaded"))
+  write.csv(df_int, file = here::here("data",paste0(ca_stations$id[i],
+                                                    "_ASOS.csv")),
+            row.names = F)
+  assign('out', rbind(out, df_int))
+}
 
