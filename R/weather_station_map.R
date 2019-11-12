@@ -40,13 +40,14 @@ ggplot() +
   ggtitle("California Wine Regions and Weather Stations")
 
 #Get station location data
-save(ca_stations, file = here::here('data/wine_country_riem_stations.rdata'))
+# save(ca_stations, file = here::here('data/wine_country_riem_stations.rdata'))
+load(file = here::here('data/wine_country_riem_stations.rdata'))
 
 #download time series from each station. Write to csv
 out <- NULL
-for (i in 1:length(unique(ca_stations$id))){
+for (i in 2:length(unique(ca_stations$id))){
   df <- riem::riem_measures(station = ca_stations$id[i],
-                      date_start = "1980-01-01")
+                      date_start = "1960-01-01")
   df_int <- 
     df %>% group_by(station, lon, lat, year(valid)) %>% 
     dplyr::summarise_at(vars(tmpf:mslp), mean, na.rm = TRUE)
