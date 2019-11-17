@@ -29,6 +29,10 @@ ca_stations <- riem::riem_stations("CA_ASOS") %>%
   st_transform(crs = raster::crs(counties)) %>% 
   st_intersection(.,counties %>% filter(!is.na(`Wine areas`)))
 
+central_coast_stations <- ca_stations %>% 
+  filter(Wine.areas == "Central coast")
+
+# save(central_coast_stations, file = here::here("data/central_coast_stations.rdata"))
 #generate map of wine counties and ASOS stations
 ggplot() +
   geom_sf(data = counties, alpha = 0.01) +
@@ -41,18 +45,22 @@ ggplot() +
 
 #Get station location data
 # save(ca_stations, file = here::here('data/wine_country_riem_stations.rdata'))
-load(file = here::here('data/wine_country_riem_stations.rdata'))
-
+# load(file = here::here('data/wine_country_riem_stations.rdata'))
+load(file = here::here("data/central_coast_stations.rdata"))
 #download time series from each station. Write to csv
 out <- NULL
-for (i in 2:length(unique(ca_stations$id))){
-  df <- riem::riem_measures(station = ca_stations$id[i],
-                      date_start = "1960-01-01")
+for (i in 1:length(unique(central_coast_stations$id))){
+  df <- riem::riem_measures(station = central_coast_stations$id[i],
+                      date_start = "1989-01-01")
+  message(head(df))
+  
   df_int <- 
-    df %>% group_by(station, lon, lat, year(valid)) %>% 
+    df %>% group_by(station, lon, lat, year(valid), month(valid),
+                    day(valid)) %>% 
     dplyr::summarise_at(vars(tmpf:mslp), mean, na.rm = TRUE)
-  print(paste0(ca_stations$id[i], "downloaded"))
-  write.csv(df_int, file = here::here("data",paste0(ca_stations$id[i],
+  message(paste0(central_coast_stations$id[i], " downloaded"))
+  
+  write.csv(df_int, file = here::here("data/central_coast_stations",paste0(central_coast_stations$id[i],
                                                     "_ASOS.csv")),
             row.names = F)
   assign('out', rbind(out, df_int))
