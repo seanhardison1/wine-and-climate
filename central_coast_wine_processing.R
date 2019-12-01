@@ -24,10 +24,11 @@ t <- central_coast_wines %>%
                                            collapse = "|"))) 
 central_coast_wines %<>% 
   filter(!str_detect(variety, "https")) %>% 
-  rbind(.,t)
+  rbind(.,t) %>% 
+  filter(years > 1900)
  
-save(central_coast_wines, file = here::here('data/processed_cc_wines.rdata'))
-
+# save(central_coast_wines, file = here::here('data/processed_cc_wines.rdata'))
+write_csv(central_coast_wines,  here::here('data/cc_wine_lacking_data.csv'))
 # write_csv(t, here::here('data/broken_links.csv'))
 # 
 # t <- data.frame(group = c("rhis is chardonnay","this si a petite sirah",
