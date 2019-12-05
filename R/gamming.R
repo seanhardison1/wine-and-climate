@@ -3,70 +3,141 @@ library(mgcv)
 library(tidyverse)
 library(magrittr)
 library(itsadug)
+library(zoo)
+library(forecast)
 
-ratings <- readxl::read_excel(here::here("data/north_coast_wine_ratings.xlsx"))
-ratings %<>% tidyr::gather(Var, Value, -year) %>% 
-  mutate(Value = as.numeric(Value))
+ #load data sets
+ratings <- readxl::read_excel(here::here("data/north_coast_wine_ratings.xlsx")) %>% 
+  mutate_all(.,as.numeric)
+load(here::here("data/north_coast_climate_indices.rdata"))
+# https://climatedataguide.ucar.edu/climate-data/nino-sst-indices-nino-12-3-34-4-oni-and-tni
+enso <- readxl::read_excel(here::here('data/oni.xlsx'))  %>%
+  tidyr::gather(Month, Value, -year) %>% 
+  group_by(year) %>% 
+  dplyr::summarise(enso = mean(Value)) %>% 
+  filter(year != 2019)
 
-load(here::here('data/north_coast_climate.rdata'))
-
-clim_stations <- north_coast_weather %>% 
-  group_by(station, `year(valid)`) %>% 
-  dplyr::summarise_at(vars(tmpf:mslp), mean, na.rm = T) %>% 
-  dplyr::rename(year = `year(valid)`) %>% 
-  tidyr::gather(.,Var, Value, -year, -station)
-
-
-ggplot() +
-  geom_line(data = clim_stations, aes(x = year, y = Value,
-                             color = station))+
-  facet_wrap(.~Var, scales = "free_y")
-
-clim <- north_coast_weather %>% 
-  group_by(`year(valid)`) %>% 
-  dplyr::summarise_at(vars(tmpf:mslp), mean, na.rm = T) %>% 
-  dplyr::rename(year = `year(valid)`) %>% 
-  tidyr::gather(.,Var, Value, -year)
-
-clim_ratings <- clim %>% 
+clim_ratings <- clim_indices %>% 
   left_join(.,ratings, by = "year") %>% 
-  dplyr::select(year, 
-                clim_var = Var.x, 
-                varietal = Var.y,
-                rating = Value.y,
-                clim_val = Value.x)
+  left_join(.,enso)
 
-ggplot(data = clim_ratings) +
-  geom_point(aes(x = clim_val, y = rating, color = varietal)) +
-  stat_smooth(method = "lm", aes(x = clim_val, y = rating,
-                                 group = varietal)) +
-  facet_wrap(.~clim_var, scales = "free")
+#colinearity check
+GGally::ggpairs(clim_ratings %>% dplyr::select(-year,-chardonnay:-`pinot noir`))
 
-(t <- clim_ratings %>% filter(clim_var == "tmpf") %>% 
-  split(.,.$varietal) %>% 
-  map(~ lm(rating ~ clim_val, data = .x)) %>% 
-  map(summary) 
-)
+#First we assess the time series for ARIMA structure
+clim_vars <- names(clim_ratings)[c(2:6)]
+wine_vars <- names(clim_ratings)[11:14]
+mod_out <- NULL
+for (i in clim_vars){
+  for (j in wine_vars){
+    
+    mod <- gamm(get(paste(j)) ~ s(enso) + s(year),
+           data = clim_ratings,
+           method = "REML")
+    
+   out <- broom::tidy(mod$gam) %>% 
+      mutate(wine = j,
+             clim = i,
+             edf = round(edf, 5))
+   
+   assign('mod_out', rbind(mod_out, out))
+   
+  }
+}
 
 
-gam_clim <- clim_ratings %>% filter(clim_var == "tmpf") %>% 
-  mutate(varietal = factor(varietal)) 
 
-temp_mod <- 
-  gam(rating ~ s(clim_val) +
-        s(clim_val, varietal, m = 2, bs = "fs") ,
-    data = gam_clim, method = "REML")
-plot(temp_mod)
+clim_vars <- names(clim_ratings)[c(2:6)]
+mod_out <- NULL
+for (i in clim_vars){
 
-par(mfrow = c(1,2),
-    mar = c(4,4,4,1))
-plot_smooth(temp_mod, view = "clim_val", plot_all = "varietal",
-            col = "#b591c94D", 
-            legend_plot_all = NA, 
-            hide.label = T, main = "Summed and Partial Effects")
-plot_smooth(temp_mod, view = "clim_val", plot_all = "varietal",
-            col = "#f5d1424D",
-            rm.ranef = T, legend_plot_all = NA, 
-            hide.label = T,add = T)
-plot_smooth(temp_mod, view = "clim_val", plot_all = "varietal",
-            hide.label = T, main = "Partial Effects")
+    mod <- gam(get(paste("cabernet sauvignon")) ~ s(get(paste(i))) + s(enso) + s(year),
+                data = clim_ratings,
+                method = "REML")
+    
+    out <- broom::tidy(mod$gam) %>% 
+      mutate(wine = "cabernet sauvignon",
+             clim = i)
+    assign('mod_out', rbind(mod_out, out))
+  }
+
+mod_out %>% filter(str_detect(term, "enso")) %>% arrange(desc(p.value))
+    
+clim_vars <- names(clim_ratings)[c(2:6)]
+mod_out <- NULL
+for (i in clim_vars){
+  
+  mod <- gam(get(paste("cabernet sauvignon")) ~ 
+                s(get(paste(i))) +
+                s(enso) + 
+                s(year),
+              data = clim_ratings,
+              method = "REML")
+  
+  out <- broom::tidy(mod) %>% 
+    mutate(wine = "cabernet sauvignon",
+           clim = i)
+
+  assign('mod_out', rbind(mod_out, out))
+}
+
+mod_out %>% filter(edf > 1.0001) %>% View
+
+g1 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(tmin_avg_gs, bs = "ts") + 
+            s(enso, bs = "ts") + 
+            s(year, bs = "ts"),
+          select = T,
+          data = clim_ratings)
+
+g2 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(tmin_avg_gs, bs = "ts") + 
+            s(enso, bs = "ts") + 
+            s(year, bs = "ts"),
+          select = T,
+          data = clim_ratings)
+
+g2 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(tmax_avg_gs, bs = "ts") + 
+            s(enso, bs = "ts") + 
+            s(year, bs = "ts"),
+          select = T,
+          data = clim_ratings)
+
+g3 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(gdd, bs = "ts") + 
+            s(enso, bs = "ts") + 
+            s(year, bs = "ts"),
+          select = T,
+          data = clim_ratings)
+
+g4 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(tavg_rp, bs = "ts") + 
+            s(enso, bs = "ts") + 
+            s(year, bs = "ts"),
+          select = T,
+          data = clim_ratings)
+
+g5 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(tavg_gs, bs = "ts") + 
+            s(enso, bs = "ts") + 
+            s(year, bs = "ts"),
+          select = T,
+          data = clim_ratings)
+
+g6 <- gam(get(paste("cabernet sauvignon")) ~  
+          s(enso, bs = "ts") + 
+          s(year, bs = "ts"),
+          select = T,
+          data = clim_ratings)
+
+g7 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(year, bs = "ts"),
+          select = T,
+          data = clim_ratings)
+
+g8 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(enso, bs = "ts"),
+          select = T,
+          data = clim_ratings)
+AIC(g1, g2, g3, g4, g5, g6, g7,g8)

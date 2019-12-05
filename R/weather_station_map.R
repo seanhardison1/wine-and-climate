@@ -2,6 +2,7 @@ library(sf)
 library(riem)
 library(tidyverse)
 library(lubridate)
+library(magrittr)
 
 #Counties in CA wine growing region
 central_coast <- c("Ventura","Santa Barbara", "San Luis Obispo", "Monterey",
@@ -51,21 +52,21 @@ ggplot() +
 # load(file = here::here('data/wine_country_riem_stations.rdata'))
 load(file = here::here("data/central_coast_stations.rdata"))
 #download time series from each station. Write to csv
-out <- NULL
+
 for (i in 1:length(unique(north_coast_stations$id))){
-  df <- riem::riem_measures(station = north_coast_stations$id[i],
+  df_int <- riem::riem_measures(station = north_coast_stations$id[i],
                       date_start = "1970-01-01")
-  message(head(df))
   
-  df_int <- 
-    df %>% group_by(station, lon, lat, year(valid), month(valid),
-                    day(valid)) %>% 
-    dplyr::summarise_at(vars(tmpf:mslp), mean, na.rm = TRUE)
+  df_int  %<>% 
+    group_by(station, lon, lat, year(valid), month(valid),
+                    day(valid)) %>%
+    dplyr::summarise(tmpf_min = min(tmpf, na.rm = TRUE),
+                     tmpf_max = max(tmpf, na.rm = TRUE)) %>% 
+    mutate(tmpf_avg = (tmpf_min + tmpf_max)/2)
+  
   message(paste0(north_coast_stations$id[i], " downloaded"))
   
-  write.csv(df_int, file = here::here("data/north_coast_stations",paste0(north_coast_stations$id[i],
-                                                    "_ASOS.csv")),
-            row.names = F)
-  assign('out', rbind(out, df_int))
+  save(df_int, file = here::here("data/north_coast_stations",paste0(north_coast_stations$id[i],
+                                                    "_ASOS.rdata")))
 }
 
