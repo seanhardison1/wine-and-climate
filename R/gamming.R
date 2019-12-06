@@ -19,7 +19,8 @@ enso <- readxl::read_excel(here::here('data/oni.xlsx'))  %>%
 
 clim_ratings <- clim_indices %>% 
   left_join(.,ratings, by = "year") %>% 
-  left_join(.,enso)
+  left_join(.,enso) %>% 
+  mutate(lag1_enso = lag(clim_ratings$enso))
 
 #colinearity check
 GGally::ggpairs(clim_ratings %>% dplyr::select(-year,-chardonnay:-`pinot noir`))
@@ -84,60 +85,30 @@ for (i in clim_vars){
 mod_out %>% filter(edf > 1.0001) %>% View
 
 g1 <- gam(get(paste("cabernet sauvignon")) ~ 
-            s(tmin_avg_gs, bs = "ts") + 
-            s(enso, bs = "ts") + 
-            s(year, bs = "ts"),
-          select = T,
+            s(tmin_avg_gs, bs = "tp") +
+            s(lag1_enso, bs = "tp") + 
+            s(enso, bs = "tp")+
+            s(year, bs = "tp"),
+          method = "ML",
           data = clim_ratings)
 
 g2 <- gam(get(paste("cabernet sauvignon")) ~ 
-            s(tmin_avg_gs, bs = "ts") + 
-            s(enso, bs = "ts") + 
-            s(year, bs = "ts"),
-          select = T,
-          data = clim_ratings)
-
-g2 <- gam(get(paste("cabernet sauvignon")) ~ 
-            s(tmax_avg_gs, bs = "ts") + 
-            s(enso, bs = "ts") + 
-            s(year, bs = "ts"),
-          select = T,
+            s(tmax_avg_gs, bs = "tp") +
+            s(lag1_enso, bs = "tp") + 
+            s(enso, bs = "tp")+ 
+            s(year, bs = "tp"),
+          method = "ML",
           data = clim_ratings)
 
 g3 <- gam(get(paste("cabernet sauvignon")) ~ 
-            s(gdd, bs = "ts") + 
-            s(enso, bs = "ts") + 
-            s(year, bs = "ts"),
-          select = T,
+            s(gdd, bs = "tp") +
+            s(enso, bs = "tp") + 
+            s(lag1_enso, bs = "tp") + 
+            s(year, bs = "tp"),
+          method = "ML",
           data = clim_ratings)
 
-g4 <- gam(get(paste("cabernet sauvignon")) ~ 
-            s(tavg_rp, bs = "ts") + 
-            s(enso, bs = "ts") + 
-            s(year, bs = "ts"),
-          select = T,
-          data = clim_ratings)
-
-g5 <- gam(get(paste("cabernet sauvignon")) ~ 
-            s(tavg_gs, bs = "ts") + 
-            s(enso, bs = "ts") + 
-            s(year, bs = "ts"),
-          select = T,
-          data = clim_ratings)
-
-g6 <- gam(get(paste("cabernet sauvignon")) ~  
-          s(enso, bs = "ts") + 
-          s(year, bs = "ts"),
-          select = T,
-          data = clim_ratings)
-
-g7 <- gam(get(paste("cabernet sauvignon")) ~ 
-            s(year, bs = "ts"),
-          select = T,
-          data = clim_ratings)
-
-g8 <- gam(get(paste("cabernet sauvignon")) ~ 
-            s(enso, bs = "ts"),
-          select = T,
-          data = clim_ratings)
-AIC(g1, g2, g3, g4, g5, g6, g7,g8)
+AIC(g1, g2, g3)
+gratia::draw(g1)
+gratia::draw(g2)
+gratia::draw(g3)

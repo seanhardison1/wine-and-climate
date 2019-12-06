@@ -23,7 +23,9 @@ north_coast_weather <- rbind(one, two, three, four, five)
 #summarise the source data set
 riem_summ <- north_coast_weather %>% 
   mutate_at(vars(tmpf_min:tmpf_avg),weathermetrics::fahrenheit.to.celsius) %>% 
-  group_by(year = `year(valid)`, month = `month(valid)`, day = `day(valid)`) %>% 
+  group_by(year = `year(valid)`, month = `month(valid)`, day = `day(valid)`)  %>% 
+  mutate_if(is.numeric, list(~na_if(., Inf))) %>% 
+  mutate_if(is.numeric, list(~na_if(., -Inf))) %>% 
   summarise(tmin = mean(tmpf_min, na.rm = T),
             tmax = mean(tmpf_max, na.rm = T),
             tavg = mean(tmpf_avg, na.rm = T)) %>% 
@@ -39,7 +41,7 @@ riem_summ <- north_coast_weather %>%
 gs_clim_indices <- riem_summ %>% 
   filter(month %in% c(4:10)) %>% 
   group_by(year) %>% 
-  dplyr::summarise(tavg_gs = mean(tavg),
+  dplyr::summarise(tavg_gs = mean(tavg, na.rm = T),
                    tmax_avg_gs = mean(tmax, na.rm = T),
                    tmin_avg_gs = mean(tmin, na.rm = T))
 
@@ -66,7 +68,7 @@ gdd <- riem_summ %>%
   mutate(gdd = tavg - base) %>% 
   mutate(gdd = ifelse(gdd < 0, 0, gdd)) %>% 
   group_by(year) %>% 
-  dplyr::summarise(gdd = sum(gdd))
+  dplyr::summarise(gdd = sum(gdd, na.rm = T))
 
 #annual frost days between june-july
 frost_days <- 
@@ -78,7 +80,5 @@ frost_days <-
 clim_indices <- gs_clim_indices %>% 
   left_join(., rp_clim_indices, by = "year") %>% 
   left_join(., gdd, by = "year") %>% 
-  left_join(.,frost_days, by = "year") %>% 
-  mutate_if(is.numeric, list(~na_if(., Inf))) %>% 
-  mutate_if(is.numeric, list(~na_if(., -Inf)))
+  left_join(.,frost_days, by = "year")
 save(clim_indices, file = here::here("data/north_coast_climate_indices.rdata"))

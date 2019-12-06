@@ -22,31 +22,41 @@ counties <- st_read(here::here("data/CA_Counties/CA_Counties_TIGER2016.shp")) %>
   mutate(`Wine areas` = ifelse(NAME %in% central_coast, "Central coast", 
                                 ifelse(NAME %in% north_coast, "North coast",
                                 ifelse(NAME %in% n_sj_valley, "N. San Joaquin Valley",
-                        ifelse(NAME %in% s_sj_valley, "S. San Joaquin Valley", NA)))))
+                        ifelse(NAME %in% s_sj_valley, "S. San Joaquin Valley", NA)))))%>% 
+  mutate(NC = ifelse(`Wine areas` == "North coast", "North coast","Other wine producing regions"))
   
 #intersect ASOS stations with wine counties
 ca_stations <- riem::riem_stations("CA_ASOS") %>% 
   st_as_sf(.,coords = c("lon","lat"),crs = raster::crs(counties)) %>% 
   st_transform(crs = raster::crs(counties)) %>% 
-  st_intersection(.,counties %>% filter(!is.na(`Wine areas`)))
+  st_intersection(.,counties %>% filter(!is.na(`Wine areas`))) 
 
 central_coast_stations <- ca_stations %>% 
   filter(Wine.areas == "Central coast")
 
 north_coast_stations <- ca_stations %>% 
-  filter(Wine.areas == "North coast")
+  filter(Wine.areas == "North coast") 
 
 # save(central_coast_stations, file = here::here("data/central_coast_stations.rdata"))
 #generate map of wine counties and ASOS stations
-ggplot() +
-  geom_sf(data = counties, alpha = 0.01) +
-  geom_sf(data = counties %>% filter(`Wine areas` != "NA"),
-          aes(fill = `Wine areas`)) +
-  geom_sf(data = ca_stations) +
-  coord_sf(xlim = c(-124,-114), ylim = c(32,42)) +
-  ecodata::theme_map() +
-  ggtitle("California Wine Regions and Weather Stations")
 
+counties$`Wine areas` <- factor(counties$`Wine areas`, levels = c("North coast",
+                                                                  "Central coast",
+                                                                  "N. San Joaquin Valley",
+                                                                  "S. San Joaquin Valley"))
+winos_rus <- ggplot() +
+  geom_sf(data = counties, alpha = 0.1) +
+  geom_sf(data = counties %>% filter(!is.na(NC)), aes(fill = NC)) +
+  scale_fill_manual(values = c("North coast" = "purple",
+                               "Other wine producing regions" = "grey")) +
+  geom_sf(data = north_coast_stations) +
+  coord_sf(xlim = c(-124,-114), ylim = c(32,42)) +
+  labs(fill = "") + 
+  ecodata::theme_map() +
+  ggtitle("California Wine Regions") +
+  theme(legend.position = "bottom")
+
+ggsave(winos_rus, filename = here::here("ca_wine_map.png"), device = "png", dpi = 300)
 #Get station location data
 # save(ca_stations, file = here::here('data/wine_country_riem_stations.rdata'))
 # load(file = here::here('data/wine_country_riem_stations.rdata'))
