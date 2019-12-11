@@ -1,14 +1,10 @@
 ---
-title: "Examining climate pressure-response thresholds in California viticulture"
+title: "Interactions between spatial heterogeneity and external forcing across LTER ecosystems"
 author: Sean Hardison
 output:
-  pdf_document:
-    keep_tex: yes
-    number_sections: no
-    toc: no
   word_document: null
 fontsize: 11pt
-bibliography: wine-and-climate.bib
+bibliography: ecosystem-thresholds.bib
 ---
 
 
@@ -26,9 +22,9 @@ production can be divided spatially into four general groupings aggregating admi
 The effects of climate change on many aspects California viticulture are well known. For example, @white2006 used high-resolution climate models (25 km) to show that projected increases in extreme temperatures would drastically reduce the production potential of viticulture in the United States. Further, average growing season temperatures, which have increased along the Central Coast of California by 1.6 \textdegree C since 1930 [@jones2008], are major predictors of grape maturities that vary by varietal [@jones2007]. The Pacific Decadal Oscillation (PDO) has also been shown to affect wine quality in California, with warm phases of the PDO bringing fewer frosts and longer growing seasons to the state [@jones2008]. Many potential outcomes of climate change on viticulture potential have been explored, but understanding the sensitivity of varietals around key climate pressure-response thresholds could prove beneficial to sustainable future viticulture as the climate warms. For these thresholds, small changes in climate pressure may result in large and non-linear changes to wine quality and viticulture productivity. 
 
 ## Hypothesis
-
+s
 I hypothesize that climate pressures affect California wine quality in varietally and regionally specific ways, and that these differences result in quality thresholds with potentially actionable outcomes for viticulturists. 
-
+p
 ## Data
 
 Regional long-term weather stations will be the main sources for developing relevant indices of temperature within viticultural areas. These data will be collected from 67 Automated Surface Observing System (ASOS) sensors located at various California airports; queried using the `riem` R package [@salmon2016]. Data collected by ASOS sensors is typically on the hourly timescale, with the relevant measured variable being air temperature at 2 m. Using the parameters outlined in @jones2008 as a starting point, I will derive monthly maximum, minimum, and average air temperature during the growing season (April - October), as well as average temperatures during the ripening period (August 15 - October 15). I will also be able to determine the dates of first fall frost, last spring frost, and duration of the frost-free period. 

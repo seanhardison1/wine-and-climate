@@ -1,0 +1,213 @@
+---
+title: "Lag-1 ENSO-mediated pressure-response thresholds in North Coast Cabernet Sauvignon
+  vintage ratings"
+author: ""
+fontsize: 11pt
+output:
+  pdf_document: default
+  word_document: null
+bibliography: wine-and-climate.bib
+header-includes:
+ \usepackage{float}
+---
+
+\centering
+
+## Sean Hardison
+
+## Department of Environmental Sciences, University of Virginia
+
+## December 6, 2019
+
+\thispagestyle{empty}
+\raggedright
+\clearpage
+
+```{r setup, include=FALSE}
+library(patchwork)
+library(tidyverse)
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center", fig.pos = "H", warning=F, message = F)
+options(xtable.comment = FALSE)
+
+```
+
+## Abstract
+
+The Californian wine industry produces 90% of the wine made in the United States, lending to its standing as the fourth largest wine producer in the world. Given the economic and cultural significance of Californian wines, there is a large body of literature exploring the role of climate variables on wine quality. We add to this work by presenting a generalized additive modeling framework for assessing climate-mediated thresholds in wine vintage quality. In particular, we focus our analysis on Cabernet Sauvignon produced in the North Coast region. We show that North Coast Cabernet Sauvignon vintage ratings are in part mediated by non-linear functional relationships with the lag-1 Oceanic Niño Index, which describes the El Niño-Southern Oscillation. Further, we identified a positive linear relationship between a non-lagged ENSO index and wine ratings. Regional climate indices including growing degree days and average minimum and maximum growing season temperatures were not identified as significant predictors of wine ratings, nor was the Pacific Decadal Oscillation index. 
+
+## Introduction
+
+Wine grapes have been cultivated in the state of California for over two centuries, and wine production from California now makes up over 90% of the wines produced in the United States [@cahill2007; @alston2018]. The quality of wines produced in a given year results from the interplay of many important factors, including regional soil properties, weather patterns, and production goals [@alston2018]. In California, these factors play out uniquely across the four major administrative regions for wine production, which includes the South San Joaquin Valley, North San Joaquin Valley, Central Coast, and North Coast. In this work, we focused primarily on the contributions of climate variables to Cabernet Sauvignon wine ratings in the North Coast region of California. Viticulture has a rich history in the North Coast region, where the famous wine-producing Marin, Napa, Sonoma, Lake, and Mendocino Counties can be found. 
+
+The study of climate variables contributing to wine quality also has a rich history in the North Coast region. Much of this work has focused on regional climate variables, such as growing degree days, growing season temperatures, incidence of frost among many others [@nemani2001; @jones2004; @jones2008]. A more geographically generalized model of this is provided by @jones2007, which showed that average growing season temperatures may be used to define the growth potential of different grape varietals.  
+
+The influence of large-scale teleconnections and coupled oceanic-atmospheric interactions on wine vintage quality, such as the Pacific Decadal Oscillation (PDO) and El Niño-Southern Oscillation (ENSO) respectively, have also been investigated. @jones2008 showed that ENSO phase did not have a strong influence on Cabernet Sauvignon ratings in Napa Valley, but that neutral ENSO conditions combined with a cold Pacific Decadal Oscillation phase led to declines in ratings. Conversely, warm PDO phases have been shown to lead to more favorable grape growing conditions in the North Coast region, including warmer winter and spring months that lead to longer growing seasons and decreased prevalence of frost [@nemani2001; @jones2008]. 
+
+Here we used generalized additive models (GAMs) to identify non-linear thresholds in North Coast, CA Cabernet Sauvignon wine ratings in response to regional climate variables, the Oceanic Niño Index, and Pacific Decadal Oscillation. This modeling framework is commonly used in the ecosystem-based fisheries management literature to detect thresholds in pressure-response relationships [@large2013] (e.g. sea-surface temperature thresholds in fish abundance), but has yet to be implemented for the study of climate-viticulture relationships. We hypothesized that there exist climate-mediated regions of stability within North Coast Cabernet Sauvignon ratings.
+
+## Methods
+
+#### Wine vintage ratings
+
+Wine vintage ratings were sourced from the Robert Parker Wine Advocate (RPWA) Vintage Guide (https://www.robertparker.com/resources/vintage-chart), which provides vintage ratings for wines from around the world for the period of 1970-2018. The period of record for Cabernet Sauvignon ratings used in this analysis was 1970-2016. Ratings for Cabernet Sauvignon ratings were not available for 1972-1974, nor 1976. RPWA ratings fall along a 100-point scale, and the review process has not changed since its inception. Upon visual inspection the ratings appear to be normally distributed. 
+
+#### Climate data
+
+Regional climate indices were aggregated from Automated Surface Observing System (ASOS) stations located at five different airports within the North Coast region of California (Fig. 1). Hourly ASOS data between 1970-2019 were queried using the R package *riem* [@salmon2016], and all temperature variables were assumed to be measured at an elevation of 2 m. Climate indices were calculated according to methods listed in [@jones2008], where growing season fell between April-October and ripening period between August 15 - October 15.
+
+* Average minimum growing season temperature 
+* Average maximum growing season temperature
+* Annual growing degree days (GDD), where $GDD = \sum_{i = Apr 1}^{n = Oct 31} (\overline{T_i^{\circ}C} - 10^{\circ}C)$
+
+The annually-averaged Oceanic Niño Index (ONI) was chosen to characterize the effect of ENSO phase on North Coast Cabernet Saugvignon ratings. The ONI describes sea-surface temperature anomalies (relative to a 1971-2000 long-term mean) in the Niño 3.4 region (5N - 5S, 170W - 120W) [@todd2011]. The Pacific Decadal Oscillation, which has been shown to bring warmer winters with fewer frost days to California [@jones2008] was also included as a predictor in threshold models. We used an annually-averaged PDO index derived from monthly values made available by Nathan Mantua (UW/JISAO) at http://research.jisao.washington.edu/pdo/PDO.latest. Given the relatively high frequency of ENSO phase change, we included a lag-1 ENSO term in our model formulation. This predictor was included to test the hypothesis that the previous year's ENSO conditions affected the current year's vintage ratings. Indicator time series used as predictors are visualized in Figure 2.
+
+```{r, out.width = "60%", fig.cap="California wine producing regions, with the North Coast highlighted in purple and all others in grey. The black points in the North Coast region indicate the locations of ASOS weather stations used to derive temperature indices for this study."}
+knitr::include_graphics(here::here("ca_wine_map.png"))
+```
+
+```{r, fig.width = 8, fig.height = 5, fig.cap="Time series of predictor variables used in GAM analyses. Plot titles correspond to coded variables names."}
+load(file = here::here('data/clim_ratings_final.rdata'))
+pred_vis <- clim_ratings %>% 
+  dplyr::select( tmin_avg_gs, tmax_avg_gs,
+                lag1_enso, enso, gdd, PDO, year) %>% 
+  tidyr::gather(Var, Value, -year)
+
+enso <- ggplot(data = pred_vis %>% filter(Var == "enso")) +
+  geom_line(aes(x = year, y = Value, group = Var)) +
+  facet_wrap(.~Var, scales = "free_y") +
+  ecodata::theme_facet() +
+  xlab("") +
+  ylab("Oceanic Niño Index (°C)") 
+
+lag1_enso <- ggplot(data = pred_vis %>% filter(Var == "lag1_enso")) +
+  geom_line(aes(x = year, y = Value, group = Var)) +
+  facet_wrap(.~Var, scales = "free_y") +
+  ecodata::theme_facet() +
+  xlab("") +
+  ylab("lag-1 Oceanic Niño Index (°C)") 
+
+tmax_avg_gs <- ggplot(data = pred_vis %>% filter(Var == "tmax_avg_gs")) +
+  geom_line(aes(x = year, y = Value, group = Var)) +
+  facet_wrap(.~Var, scales = "free_y") +
+  ecodata::theme_facet() +
+  xlab("Year") +
+  ylab("Avg. max growing season temp. (°C)") 
+
+tmin_avg_gs <- ggplot(data = pred_vis %>% filter(Var == "tmin_avg_gs")) +
+  geom_line(aes(x = year, y = Value, group = Var)) +
+  facet_wrap(.~Var, scales = "free_y") +
+  ecodata::theme_facet() +
+  xlab("Year") +
+  ylab("Avg. min. growing season temp. (°C)") 
+
+
+gdd <- ggplot(data = pred_vis %>% filter(Var == "gdd")) +
+  geom_line(aes(x = year, y = Value, group = Var)) +
+  facet_wrap(.~Var, scales = "free_y") +
+  ecodata::theme_facet() +
+  xlab("Year") +
+  ylab("Growing Degree Days (n)") 
+
+pdo <- ggplot(data = pred_vis %>% filter(Var == "PDO")) +
+  geom_line(aes(x = year, y = Value, group = Var)) +
+  facet_wrap(.~Var, scales = "free_y") +
+  ecodata::theme_facet() +
+  xlab("") +
+  ylab("Pacific Decadal Oscillation (°C)") 
+
+pdo + enso + lag1_enso + tmax_avg_gs + tmin_avg_gs + gdd + plot_layout(nrow = 2)
+
+```
+
+
+### Statistical approach
+
+We used GAMs to estimate threshold behavior in time series of Cabernet Sauvignon wine ratings. GAMs are generalized linear models that may be used to estimate non-linear functional relationships through additive combinations of smooth functions and parametric coefficients [@wood2011]. The GAM model formulation is given by
+
+$$g(E(Y)) = \beta_0 + f_1(x_1) + ... + f_n(x_n)$$,
+
+where $g(E(Y)$ is a link function relating the model fit to the predictors, $\beta_0$ is the intercept term, and $f_1(x_1)$ is a smoothing function of the covariate $x_1$. 
+
+Collinearity between predictors in GAMs renders interpretations difficult [@zuur2009], so prior to fitting the models we assessed predictors for collinearity using correlation matrices (see Appendix). Collinear predictors were not included in model fits, which was particularly common for regional weather indices (r > 0.7). There was collinearity between ENSO and PDO indices (r = 0.6), and so we modeled these terms in separate models and used a model selection approach (discussed below) to choose the best fitting model. AR1 error structure of the ratings time series was assessed and determined to be negligible ($\phi < 0.05$), so we modeled the time series under the assumption of independence in residuals.
+
+Our ratings time series was relatively short (n = 41), so we were limited in the number of predictors that we could include as smooth terms during a model selection process. To find the best model under this limitation, we first fit six GAMs using maximum likelihood estimation with varying combinations of predictors (Table 1) using the R package *mgcv* [@wood2011]. We then used AIC to select the best model from the group, yielding a single, fully parameterized model. 
+
+```{r}
+library(kableExtra)
+load(file = here::here('data/mod_aics.rdata'))
+models <- data.frame(`mgcv Formulation` = c("cab_sav ~ s(tmin_avg_sg) + s(lag1_enso) + s(enso) + s(year)" , 
+                                  "cab_sav ~ s(tmax_avg_sg) + s(lag1_enso) + s(enso) + s(year)", 
+                                  "cab_sav ~ s(GDD) + s(lag1_enso) + s(enso) + s(year)", 
+                                  "cab_sav ~ s(tmin_avg_sg) + s(lag1_enso) + s(PDO) + s(year)", 
+                                  "cab_sav ~ s(tmax_avg_sg) + s(lag1_enso) + s(PDO) + s(year)",
+                                  "cab_sav ~ s(GDD_avg_sg) + s(lag1_enso) + s(PDO) + s(year)"),
+           AIC = round(mod_aics$AIC,3),
+           df = round(mod_aics$df,3))
+kable(models, "latex", booktabs = T, caption = "GAMs formulated in during the model selection phase of the study with associated AIC values and model degrees of freedom (df).") %>%
+kable_styling(latex_options = "striped")
+```
+
+Non-significant predictors were dropped individually and model fits were reassessed using AIC until the best fitting model was determined: 
+  
+```{r, eval = F, include = T, echo = T}
+gam(cabernet_sauvignon ~ s(enso) + s(lag1_enso) + s(year), 
+                          method = "ML", data = clim_ratings)
+```
+
+
+#### Threshold analysis
+
+We next identified significant thresholds in the selected model by approximating first derivatives along the fitted GAM using a finite differences approach. This method approximates derivatives by calculating slopes between closely positioned points. A 95% point-wise confidence interval was then estimated for each calculated derivative (shown in @monteith2014; tutorial: https://www.fromthebottomoftheheap.net/2014/05/15/identifying-periods-of-change-with-gams/). Model predictions where the 95% confidence interval for the derivative did not include 0 were considered to be significant regions of change in the models.
+
+## Results
+
+The best model identified during the selection process included the lag-1 ENSO index (i.e. lag-1 ONI), ENSO index, and year as predictors (Table 1) (deviance explained = 65.7%). Both lag-1 ENSO index and year smooth terms were significant at the P < 0.01 level, and the ENSO index term was significant at P < 0.05. The effect of lag-1 ENSO was modeled as a non-linear smooth (edf = 6.34), and both ENSO and year terms were modeled as linear regressions, indicating positive trends in the effect of year and ENSO index on North Coast Cabernet Sauvignon wine ratings (edf = 1) (Fig. 3).
+
+```{r, results='asis'}
+load(file = here::here("data/best_model.rdata"))
+itsadug::gamtabs(mod, caption = "Summary of model coefficients from the selected GAM.")
+```
+
+```{r, fig.cap="Component smooth terms from the best GAM fit with y-axes centered on zero and on the scale of the predictor variable. Shaded regions show 95\\% confidence intervals for the smooths.", fig.height = 4}
+gratia::draw(mod)
+```
+
+Results from threshold analyses suggest two significant thresholds in North Coast Cabernet Sauvignon wine ratings in response to the lag-1 ENSO index. The first occurs when the annual ONI drops below ~-0.9 °C, where ratings decline with decreasing lag-1 ENSO conditions. A second can been when the lag-1 ENSO indicator increases to ~0.6 °C, beyond which the model suggest ratings decline significantly.
+
+```{r, fig.cap = "The component smooth term for the relationship between lag-1 ONI and Cabernet Sauvignon wine ratings (A), and the first derivative of the component smooth with associated 95\\% point-wise confidence intervals for smooth derivatives (B). Regions of the line highlighted in blue indicate where derivatives were determined to be significantly greater than 1, and regions in red show where derivatives were found to be less than one.", fig.height=2.5}
+source(here::here("R/gam_changepoint_figs.R"))
+lag1_enso_gam_fit + lag1_enso_deriv + plot_layout(nrow = 1)
+
+```
+
+
+## Discussion
+
+Here we presented a generalized additive modeling analysis of climate-mediated functional relationships of Cabernet Sauvignon ratings from the North Coast of California, USA. Results suggest that both the current and lag-1 forms of the annual Oceanic Niño Index have positive linear and non-linear effects on wine ratings respectively. These results appear to contradict the conclusions drawn in @jones2008, which found no relationship between wine ratings and ENSO phase. However, the time series used in @jones2008 was much longer (1933-2001) and out of phase with the time series used in this analysis (1973-2016), which could lead to different conclusions. 
+
+We found that the Pacific Decadal Oscillation was not as important as ENSO nor lag-1 ENSO in predicting Cabernet Sauvignon wine ratings. This finding may be due again to the short time series used in this analysis, as the period of the Pacific Decadal Oscillation is on the order of 20-30 years [@mantua1997]. This shortcoming is supported by our data, which show that 68% of the annual PDO values considered in this analysis were greater than zero, suggesting a potential lack of explanatory power from the PDO predictor. 
+
+Despite these caveats, our results suggest that there exists a region of stability in Cabernet Sauvignon wine ratings that is mediated by lag-1 ENSO conditions. This model shows that if the previous year's ONI falls below -0.9°C or above 0.6°C, then there will likely be declines in North Coast Cabernet Sauvignon rating. This relationship could be explained by a "too much or too little of a good thing" hypothesis. In California, El Niño years bring more winter precipitation than average [@jones2008], which could contribute to wetter growing seasons and ripening periods for the next year's vintage. However, the model shows that extreme departures in either direction from the region of stability tend to result in lower quality wines. A positive relationship in the non-lagged ONI with wine rating may suggest that positive-phase ENSO conditions in the late winter and early spring are favorable for vintage quality. As this relationship was determined to be linear, early season viticulture conditions may be less sensitive to extreme ENSO conditions.
+
+Regional climate indices, including annual growing degree days, average minimum and average maximum growing season temperatures, were not found to be predictors of Cabernet Sauvignon wine ratings. This result could potentially be due to the location of ASOS stations in North County leading to estimates of temperature not indicative of wine growing areas. Future analyses should consider including indices for precipitation, number of frost days, and more phenologically specific indices, such as growing season average temperatures. Temperature indices have been identified as strong predictors of wine quality [@jones2007], and so future work should investigate these relationships more thoroughly.
+
+## Conclusions
+
+Here we presented a model for identifying climate-mediated thresholds in North Coast Cabernet Sauvignon wine quality that suggests ENSO and lag-1 ENSO indices are strong predictors of ratings. The model suggests a region of wine quality stability that is mediated by a lag-1 ENSO index, potentially due to pre-growing season conditions. These pressure-response threshold dynamics have not been precisely identified in wine-climate relationships, and this work could be expanded to consider any other varietals and relevant climate variables. 
+
+## Acknowledgements
+
+I would like to acknowledge Prof. Robert Davis for a helpful review of the initial proposal of this work, and also Prof. Gregory Jones for his guidance in identifying suitable wine ratings data. 
+
+\newpage
+
+## Appendix
+
+```{r, fig.cap = "Correlation matrix of climate indices considered in the model fitting process.",fig.width = 8,fig.height = 10}
+load(file = here::here('data/clim_ratings_final.rdata'))
+GGally::ggpairs(clim_ratings %>% dplyr::select(-year, -`cabernet sauvignon`:-`pinot noir`))
+```
+
+\newpage
+
+## Literature Cited

@@ -77,8 +77,22 @@ frost_days <-
   group_by(year) %>% 
   dplyr::summarise(frost_days = n())
 
+#PDO
+
+pdo_raw <- readxl::read_excel(here::here("data/pdo_time_series.xlsx"), col_names = F) %>% 
+  dplyr::rename(year = `...1`) 
+
+pdo <- pdo_raw %>% tidyr::gather(month, value, -year) %>% 
+  dplyr::mutate(value = as.numeric(value)) %>% 
+  group_by(year) %>% 
+  dplyr::summarise(PDO = mean(value, na.rm = T))
+
+
 clim_indices <- gs_clim_indices %>% 
   left_join(., rp_clim_indices, by = "year") %>% 
   left_join(., gdd, by = "year") %>% 
-  left_join(.,frost_days, by = "year")
+  left_join(.,frost_days, by = "year") %>% 
+  left_join(.,pdo, by = "year")
 save(clim_indices, file = here::here("data/north_coast_climate_indices.rdata"))
+
+

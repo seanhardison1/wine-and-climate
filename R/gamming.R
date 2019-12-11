@@ -23,7 +23,7 @@ clim_ratings <- clim_indices %>%
   mutate(lag1_enso = lag(clim_ratings$enso))
 
 #colinearity check
-GGally::ggpairs(clim_ratings %>% dplyr::select(-year,-chardonnay:-`pinot noir`))
+GGally::ggpairs(clim_ratings %>% dplyr::select(-year, -`cabernet sauvignon`:-`pinot noir`))
 
 #First we assess the time series for ARIMA structure
 clim_vars <- names(clim_ratings)[c(2:6)]
@@ -108,7 +108,31 @@ g3 <- gam(get(paste("cabernet sauvignon")) ~
           method = "ML",
           data = clim_ratings)
 
-AIC(g1, g2, g3)
+g4 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(tmin_avg_gs, bs = "tp") +
+            s(lag1_enso, bs = "tp") + 
+            s(PDO, bs = "tp")+
+            s(year, bs = "tp"),
+          method = "ML",
+          data = clim_ratings)
+
+g5 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(tmax_avg_gs, bs = "tp") +
+            s(lag1_enso, bs = "tp") + 
+            s(PDO, bs = "tp")+ 
+            s(year, bs = "tp"),
+          method = "ML",
+          data = clim_ratings)
+
+g6 <- gam(get(paste("cabernet sauvignon")) ~ 
+            s(gdd, bs = "tp") +
+            s(PDO, bs = "tp") + 
+            s(lag1_enso, bs = "tp") + 
+            s(year, bs = "tp"),
+          method = "ML",
+          data = clim_ratings)
+
+mod_aics <- AIC(g1, g2, g3, g4, g5, g6)
 gratia::draw(g1)
 gratia::draw(g2)
 gratia::draw(g3)
