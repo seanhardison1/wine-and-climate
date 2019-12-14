@@ -62,7 +62,7 @@ Regional climate indices were aggregated from Automated Surface Observing System
 The annually-averaged Oceanic Niño Index (ONI) was chosen to characterize the effect of ENSO phase on North Coast Cabernet Saugvignon ratings. The ONI describes sea-surface temperature anomalies (relative to a 1971-2000 long-term mean) in the Niño 3.4 region (5N - 5S, 170W - 120W) [@todd2011]. The Pacific Decadal Oscillation, which has been shown to bring warmer winters with fewer frost days to California [@jones2008] was also included as a predictor in threshold models. We used an annually-averaged PDO index derived from monthly values made available by Nathan Mantua (UW/JISAO) at http://research.jisao.washington.edu/pdo/PDO.latest. Given the relatively high frequency of ENSO phase change, we included a lag-1 ENSO term in our model formulation. This predictor was included to test the hypothesis that the previous year's ENSO conditions affected the current year's vintage ratings. Indicator time series used as predictors are visualized in Figure 2.
 
 ```{r, out.width = "60%", fig.cap="California wine producing regions, with the North Coast highlighted in purple and all others in grey. The black points in the North Coast region indicate the locations of ASOS weather stations used to derive temperature indices for this study."}
-knitr::include_graphics(here::here("ca_wine_map.png"))
+knitr::include_graphics(here::here("images/ca_wine_map.png"))
 ```
 
 ```{r, fig.width = 8, fig.height = 5, fig.cap="Time series of predictor variables used in GAM analyses. Plot titles correspond to coded variables names."}
